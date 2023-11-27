@@ -1,0 +1,137 @@
+<html>
+    <head>
+        <title>Demo FTMS Treadmill Web Console</title>
+    </head>
+
+    <body>
+        <h1>Web Bluetooth / FTMS BLE Treadmill</h1>
+  
+        <h2>Connection</h2>
+        <button id="bleConnectionButton">Connect FTMS BLE Treadmill</button>
+        <br />
+        <span>Open the Web brower console to see the result.</span>
+    </body>
+
+    <script>
+        const serviceFTMS = 0x1826;
+        const treadmillData = 0x2acd;
+
+        document.querySelector('#bleConnectionButton').addEventListener('click', function() {
+            if (isWebBluetoothEnabled()) {
+                connect();
+            }
+        });
+  
+
+   
+    function isWebBluetoothEnabled() {
+        if (navigator.bluetooth) {
+            return true;
+        } else {
+            ChromeSamples.setStatus('Web Bluetooth API is not available.\n' +
+                'Please make sure the "Experimental Web Platform features" flag is enabled.');
+            return false;
+        }
+    }
+
+
+
+    function connect() {
+        console.log('Requesting FTMS Bluetooth Device...');
+        navigator.bluetooth.requestDevice({
+            filters:[{
+                services: [serviceFTMS],
+            }]})
+        .then(device => {
+        console.log('Connecting to GATT Server...');
+        return device.gatt.connect();
+        })
+        .then(server => {
+            console.log('Getting Service...');
+            return server.getPrimaryService(serviceFTMS);
+        })
+        .then(service => {
+            console.log('Getting Characteristic...');
+            return service.getCharacteristic(treadmillData);
+        })
+        .then(characteristic => {
+            var treadmillDataCharacteristic = characteristic;
+            return treadmillDataCharacteristic.startNotifications().then(_ => {
+                console.log('> Notifications started');
+                treadmillDataCharacteristic.addEventListener('characteristicvaluechanged', handleNotifications);
+            });
+        })
+        .catch(error => {
+            console.log('Argh! ' + error);
+        }); 
+    }
+
+
+
+
+    function handleNotifications(event) {
+        let value = event.target.value;
+        let a = [];
+        // Convert raw data bytes to hex values in order to console log each notification.
+        for (let i = 0; i < value.byteLength; i++) 
+        {
+            a.push('0x' + ('00' + value.getUint8(i).toString(16)).slice(-2));
+        }
+        console.log('> ' + a.join(' '));
+
+        var flags = value.getUint16(0, /*littleEndian=*/true);
+        // 2octets for flags, 2octets for instant speed, nextPosition is incremented following the number of octets for each value
+        var nextPosition = 4;
+
+
+        if ((flags & (1 << 1)) != 0) {posAvgSpeed=nextPosition; nextPosition+=2;}
+        if ((flags & (1 << 2)) != 0) {posTotDistance=nextPosition; nextPosition+=3;}//4
+        if ((flags & (1 << 3)) != 0) {posInclination=nextPosition; nextPosition+=4;}//8
+        if ((flags & (1 << 4)) != 0) {posElevGain=nextPosition; nextPosition+=4;}
+        if ((flags & (1 << 5)) != 0) {posInsPace=nextPosition; nextPosition+=1;}
+        if ((flags & (1 << 6)) != 0) {posAvgPace=nextPosition; nextPosition+=1;}
+        if ((flags & (1 << 7)) != 0) {posKcal=nextPosition; nextPosition+=5;}
+        if ((flags & (1 << 8)) != 0) {posHR=nextPosition; nextPosition+=1;}
+        if ((flags & (1 << 9)) != 0) {posMET=nextPosition; nextPosition+=1;}
+        if ((flags & (1 << 10)) != 0) {posElaspedTime=nextPosition; nextPosition+=2;}
+        if ((flags & (1 << 11)) != 0) {posRemainTime=nextPosition; nextPosition+=2;}
+        if ((flags & (1 << 12)) != 0) {posForceBelt=nextPosition; nextPosition+=4;}
+
+        // instantaneous speed
+        speed = value.getUint16(2, /*littleEndian=*/true)/100;
+        console.log('> Speed ' + speed);
+
+        //distance
+        distance = value.getUint16(posTotDistance, /*littleEndian=*/true);
+        distance_complement = value.getUint8(posTotDistance + 2, /*littleEndian=*/true);
+        distance_complement = distance_complement << 16;
+        distance = distance + distance_complement;
+        console.log('> Distance ' + distance);
+
+        if (typeof posInclination != "undefined")
+        {
+          inclination = (value.getInt16(posInclination, /*littleEndian=*/true)/10);
+          console.log('> Inclinaison % ' + inclination );
+        }
+
+        if (typeof posKcal != "undefined")
+        {
+          kcal = (value.getUint16(posKcal, /*littleEndian=*/true));
+          console.log('> Kcal ' + kcal);          
+        }
+
+        if (typeof posHR != "undefined")
+        {
+          console.log('> HR ' + (value.getUint8(posHR, /*littleEndian=*/true)));
+        }
+
+        if (typeof posElaspedTime != "undefined")
+        {
+          console.log('> Elapsed time ' + (value.getUint16(posElaspedTime, /*littleEndian=*/true)));
+        }
+    }
+
+          
+
+    </script>
+</html>
