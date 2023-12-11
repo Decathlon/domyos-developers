@@ -13,6 +13,9 @@ You can contribute by sharing new example, please refer to our [Contributing](co
 
 Display an overlay on Decathlon Training Plus website with live data from you Fitness Machine connected by Bluetooth to your browser.
 
+## [ftms-treadmill-web-console](ftms-treadmill-web-console/)
+
+Connect to a treadmill Fitness Machine by Bluetooth to your browser. Collect some values from the treadmill data in the browser console.
 
 
 # Domyos brand guidelines
