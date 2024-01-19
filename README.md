@@ -31,6 +31,7 @@ FiTness Machine Service is a protocol to control fitness equipment.
 * Treadmill : Domyos W900
 * Treadmill : Initial run
 * Treadmill : T900D
+* Treadmill : RUN500
 * Elliptical : EL520
 * Elliptical : EL540
 * Rower : WoodRower
