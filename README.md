@@ -44,3 +44,4 @@ FiTness Machine Service is a protocol to control fitness equipment.
 [Play store](https://play.google.com/store/apps/details?id=org.cagnulen.qdomyoszwift&hl=en&gl=US) / 
 [App store](https://apps.apple.com/us/app/qz-qdomyos-zwift/id1543684531)
 * Holodia [Website](https://www.holodia.com/)
+* Treadmill-monitor [Github](https://github.com/janposselt/treadmill-monitor)
