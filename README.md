@@ -32,9 +32,13 @@ FiTness Machine Service is a protocol to control fitness equipment.
 * Treadmill : Initial run
 * Treadmill : T900D
 * Treadmill : RUN500
+* Treadmill : Compact Run100
 * Elliptical : EL520
 * Elliptical : EL540
 * Rower : WoodRower
+* Rower : Training rower 900
+* Indoor bike : Challenge bike
+* Indoor bike : Training bike 900
 
 
 # Compatible apps
